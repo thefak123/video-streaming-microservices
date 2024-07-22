@@ -83,6 +83,11 @@ async function main() {
         response.data.pipe(res);
     });
 
+    app.get("/api/hi", async (req, res) => {
+
+        res.send("Hello world")
+    });
+
     //
     // HTTP POST route to upload video from the user's browser.
     //

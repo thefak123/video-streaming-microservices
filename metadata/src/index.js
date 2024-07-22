@@ -6,6 +6,7 @@ const amqp = require('amqplib');
 // Starts the microservice.
 //
 async function startMicroservice(dbHost, dbName, rabbitHost, port) {
+    // assume useUnifiedTopology as boilerplate code, it solves several problem with old connection management logic 
     const client = await mongodb.MongoClient.connect(dbHost, { useUnifiedTopology: true });  // Connects to the database.
     const db = client.db(dbName);
     const videosCollection = db.collection("videos");
@@ -61,10 +62,15 @@ async function startMicroservice(dbHost, dbName, rabbitHost, port) {
     };
 
     // Add other handlers here.
-
+    // Fanout means every message sent to this exchange will be delivered to all queues bound to this exchange. (All of queues that are bound to this exchange are usually
+    // anonymous)
+    // video-uploaded is the exchange name
+    // This exchange can be used on the multiple microservices
     await messageChannel.assertExchange("video-uploaded", "fanout") // Asserts that we have a "video-uploaded" exchange.
 
     const { queue } = await messageChannel.assertQueue("", {}); // Creates an anonyous queue.
+
+    // Binds the anonymous queue into video-uploaded exchange
     await messageChannel.bindQueue(queue, "video-uploaded", "") // Binds the queue to the exchange.
 
     await messageChannel.consume(queue, consumeVideoUploadedMessage); // Starts receiving messages from the anonymous queue.

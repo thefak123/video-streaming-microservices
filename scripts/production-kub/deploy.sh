@@ -12,7 +12,12 @@ set -u # or set -o nounset
 #
 # Build Docker images.
 #
+
+# docker build -> this is only build the image in the local image (remember ! after -t, this is just an image name)
 docker build -t $CONTAINER_REGISTRY/metadata:1 --file ../../metadata/Dockerfile-prod ../../metadata
+
+# docker push, this will push the image into container registry in the cloud 
+# But before doing it, make sure you have done az aks get-credentials --resource-group <resource group name> --name <kubernetes service name>
 docker push $CONTAINER_REGISTRY/metadata:1
 
 docker build -t $CONTAINER_REGISTRY/history:1 --file ../../history/Dockerfile-prod ../../history
@@ -40,6 +45,7 @@ docker push $CONTAINER_REGISTRY/gateway:1
 #
 kubectl apply -f rabbit.yaml
 kubectl apply -f mongodb.yaml 
+# envsubst will pass environtment variables into specified file
 envsubst < metadata.yaml | kubectl apply -f -
 envsubst < history.yaml | kubectl apply -f -
 envsubst < mock-storage.yaml | kubectl apply -f -
